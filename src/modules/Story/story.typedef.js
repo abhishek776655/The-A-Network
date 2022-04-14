@@ -25,14 +25,7 @@ const storyTypeDefs = gql`
     user: User!
     tag: Tag
   }
-
-  type Query {
-    getUsers: [User]
-  }
-
   type Mutation {
-    register(input: RegisterInput): RegisterResponse!
-    login(email: String!, password: String!): LoginResponse!
     createStory(input: CreateStoryInput): StoryResponse!
   }
 
