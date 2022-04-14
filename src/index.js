@@ -6,7 +6,7 @@ import typedefs from "./typedefs";
 
 const prisma = new PrismaClient();
 const server = new ApolloServer({
-  resolver: resolvers,
+  resolvers: resolvers,
   typeDefs: typedefs,
   context: async ({ req }) => {
     const token = req.headers.authorization || "";

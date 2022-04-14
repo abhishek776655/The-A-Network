@@ -13,7 +13,7 @@ export default {
   },
   Mutation: {
     register: async (parent, args, { prisma }, info) => {
-      const doesUserExist = prisma.user.findUnique({
+      const doesUserExist = await prisma.user.findUnique({
         where: {
           email: args.input.email,
         },
