@@ -28,6 +28,9 @@ const storyTypeDefs = gql`
   type Mutation {
     createStory(input: CreateStoryInput): StoryResponse!
   }
+  type Query {
+    getStoriesByTag(input: GetStoriesByTagInput): [StoryResponse]
+  }
 
   type StoryResponse {
     id: ID!
@@ -39,6 +42,11 @@ const storyTypeDefs = gql`
   input CreateStoryInput {
     text: String!
     tags: [ID]
+  }
+  input GetStoriesByTagInput {
+    tags: [ID]
+    pageSize: Int!
+    page: Int!
   }
 `;
 
