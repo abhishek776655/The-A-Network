@@ -13,13 +13,29 @@ export default {
   },
   Mutation: {
     register: async (parent, args, { prisma }, info) => {
-      const doesUserExist = await prisma.user.findUnique({
+      const doesEmailExist = await prisma.user.findUnique({
         where: {
           email: args.input.email,
         },
       });
-      if (doesUserExist) {
-        throw new UserInputError("Email already exist");
+
+      const doesUsernameExist = await prisma.user.findUnique({
+        where: {
+          username: args.input.username,
+        },
+      });
+      const validationErrors = {};
+      if (doesUsernameExist) {
+        validationErrors.username = "Username already exist";
+      }
+      if (doesEmailExist) {
+        validationErrors.email = "Email already exist";
+      }
+      if (Object.keys(validationErrors).length > 0) {
+        throw new UserInputError(
+          "Failed to register due to validation errors",
+          { validationErrors }
+        );
       }
       const hashedPassword = await bcrypt.hash(args.input.password, 12);
       const data = userInputToUser(args, hashedPassword);
@@ -36,15 +52,21 @@ export default {
         },
       });
 
+      const validationErrors = {};
       if (!user) {
-        throw new Error("No such user found");
+        validationErrors.username = "No such user found";
       }
-
       const valid = await bcrypt.compare(args.password, user.password);
       if (!valid) {
-        throw new Error("Invalid password");
+        validationErrors.password = "Password is incorrect";
       }
-      const privateKey = "fjkdsjfklsdjkfjskd";
+      if (Object.keys(validationErrors).length > 0) {
+        throw new UserInputError(
+          "Failed to register due to validation errors",
+          { validationErrors }
+        );
+      }
+      const privateKey = "secretKey";
       var token = jwt.sign({ userId: user.id }, privateKey);
       return {
         token: token,
