@@ -10,6 +10,7 @@ const server = new ApolloServer({
   typeDefs: typedefs,
   context: async ({ req }) => {
     const token = req.headers.authorization || "";
+    console.log(token);
     const user = await getUser(token);
     return {
       user: user,

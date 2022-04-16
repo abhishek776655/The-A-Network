@@ -1,5 +1,5 @@
 import { storyInputToStory, storyToStoryResponse } from "./story.dto";
-
+import { AuthenticationError } from "apollo-server";
 export default {
   Mutation: {
     createStory: async (parent, args, context, info) => {

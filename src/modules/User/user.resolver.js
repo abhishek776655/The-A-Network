@@ -70,12 +70,17 @@ export default {
           { validationErrors }
         );
       }
-      var accessToken = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
-        expiresIn: 10,
-      });
+      console.log(process.env.AUTH_SECRET_KEY);
+      var accessToken = jwt.sign(
+        { userId: user.id },
+        process.env.AUTH_SECRET_KEY,
+        {
+          expiresIn: 3600,
+        }
+      );
       const refreshToken = jwt.sign(
         { userId: user.id },
-        process.env.SECRET_KEY,
+        process.env.AUTH_SECRET_KEY,
         {
           expiresIn: 86400,
         }
@@ -101,7 +106,7 @@ export default {
       try {
         let refreshTokenPayload = jwt.verify(
           refreshToken,
-          process.env.SECRET_KEY
+          process.env.AUTH_SECRET_KEY
         );
         const user = await context.prisma.user.findFirst({
           where: { refreshToken: { equals: refreshToken } },
@@ -111,9 +116,9 @@ export default {
         }
         var newAccessToken = jwt.sign(
           { userId: user.id },
-          process.env.SECRET_KEY,
+          process.env.AUTH_SECRET_KEY,
           {
-            expiresIn: 10,
+            expiresIn: 3600,
           }
         );
         return newAccessToken;
