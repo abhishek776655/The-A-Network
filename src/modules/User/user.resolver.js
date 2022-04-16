@@ -1,8 +1,9 @@
 import { userInputToUser, userToUserResponse } from "./user.dto";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { AuthenticationError, UserInputError } from "apollo-server";
 import requiresAuth from "../../services/permission";
+
 export default {
   Query: {
     getUsers: requiresAuth.createResolver(
@@ -43,6 +44,7 @@ export default {
       const ReponseUser = user;
       return ReponseUser;
     },
+
     login: async (parent, args, context, info) => {
       const user = await context.prisma.user.findFirst({
         where: {
@@ -52,9 +54,11 @@ export default {
         },
       });
 
+      console.log(user);
+
       const validationErrors = {};
       if (!user) {
-        validationErrors.username = "No such user found";
+        validationErrors.email = "No such user found";
       }
       const valid = await bcrypt.compare(args.password, user.password);
       if (!valid) {
@@ -66,12 +70,56 @@ export default {
           { validationErrors }
         );
       }
-      const privateKey = "secretKey";
-      var token = jwt.sign({ userId: user.id }, privateKey);
+      var accessToken = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
+        expiresIn: 10,
+      });
+      const refreshToken = jwt.sign(
+        { userId: user.id },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: 86400,
+        }
+      );
+
+      const updatedUser = await context.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          refreshToken: refreshToken,
+        },
+      });
       return {
-        token: token,
+        accessToken: accessToken,
         user: user,
+        refreshToken: refreshToken,
       };
+    },
+
+    getAcessToken: async (parent, args, context, info) => {
+      let refreshToken = args.refreshToken;
+      try {
+        let refreshTokenPayload = jwt.verify(
+          refreshToken,
+          process.env.SECRET_KEY
+        );
+        const user = await context.prisma.user.findFirst({
+          where: { refreshToken: { equals: refreshToken } },
+        });
+        if (!user || user.id !== refreshTokenPayload.userId) {
+          throw new AuthenticationError("Bad Token");
+        }
+        var newAccessToken = jwt.sign(
+          { userId: user.id },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: 10,
+          }
+        );
+        return newAccessToken;
+      } catch (TokenExpiredError) {
+        throw new AuthenticationError(TokenExpiredError.message);
+      }
     },
   },
 };

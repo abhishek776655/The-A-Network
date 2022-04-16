@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["mongoDb"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -35,6 +34,7 @@ model User {
   comments       Comment[] @relation("user_comments")
   commentsLikes  Comment[] @relation("comment_likes", fields: [commentLikesId], references: [id])
   commentLikesId String[]  @db.ObjectId
+  refreshToken   String?
 }
 
 model Comment {
@@ -68,7 +68,7 @@ model Tag {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   name       String
-  image      String
+  Type       String
   likesByTag Like?    @relation("like_tags")
   storiesId  String[] @db.ObjectId
   stories    Story[]  @relation("story_tags", fields: [storiesId], references: [id])

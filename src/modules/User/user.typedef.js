@@ -20,6 +20,7 @@ const typeDefs = gql`
     email: String!
     username: String!
     stories: [Story]
+    refreshToken: String
   }
 
   type UserResponse {
@@ -41,8 +42,9 @@ const typeDefs = gql`
   }
 
   type LoginResponse {
-    token: String!
+    accessToken: String!
     user: UserResponse
+    refreshToken: String!
   }
 
   input RegisterInput {
@@ -60,6 +62,7 @@ const typeDefs = gql`
   type Mutation {
     register(input: RegisterInput): RegisterResponse!
     login(email: String!, password: String!): LoginResponse!
+    getAcessToken(refreshToken: String!): String!
   }
 `;
 

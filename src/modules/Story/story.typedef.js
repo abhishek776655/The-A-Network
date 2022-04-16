@@ -2,6 +2,11 @@ const { gql } = require("apollo-server");
 
 const storyTypeDefs = gql`
   scalar DateTime
+
+  enum TagType {
+    Positive
+    Negative
+  }
   type Story {
     id: ID!
     text: String!
@@ -13,7 +18,7 @@ const storyTypeDefs = gql`
   type Tag {
     id: ID!
     name: String!
-    image: String!
+    type: TagType!
     likesByTag: [Like]
     storiesId: [String]
     stories: [Story]

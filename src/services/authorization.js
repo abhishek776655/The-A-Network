@@ -4,7 +4,7 @@ export const getUser = (token) => {
     return null;
   }
   try {
-    var decoded = jwt.verify(token, "fjkdsjfklsdjkfjskd");
+    var decoded = jwt.verify(token, process.env.SECRET_KEY);
     return decoded;
   } catch (err) {
     console.log(err);
