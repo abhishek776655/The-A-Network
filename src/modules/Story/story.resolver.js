@@ -13,7 +13,7 @@ export default {
           author: true,
         },
       });
-      console.log(story);
+
       return story;
     },
   },
